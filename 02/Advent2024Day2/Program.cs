@@ -5,27 +5,31 @@ Console.WriteLine("Advent Day 02!");
 
 var input = ReadInput();
 
+
 var sw = Stopwatch.StartNew();
 //var result = CountSafe(input);
 var result = CountSafeWithDampener(input);
 sw.Stop();
-Console.WriteLine($"Took [{sw.Elapsed}]");
+Console.WriteLine($"Took [{sw.Elapsed}] all input was [{input.Count()}]");
 // with recursion: ~ 20 mcrSec // 00:00:00.0193139
 // with agg: ~ 26 mcrSec // 00:00:00.0264172
 
 Console.WriteLine(result);
 
-int CountSafeWithDampener(IEnumerable<List<int>> input) => input.Count(line => 
-true //!HasThresholdExceed(line)
-    && (IsSafe(line) || IsSafe(line[1..])/* || IsSafeWithDampener(line)*/));
+int CountSafeWithDampener(IEnumerable<List<int>> input) => input.Count(line =>
+    IsSafe(line) || IsSafeWithDampener(line));
+
+int CountSafeWithDampenerV1(IEnumerable<List<int>> input) => input.Count(line =>
+    (IsSafe(line) || IsSafe(line[1..]) || IsSafe(line[..^1]) || IsSafeWithDampener(line)));
 
 int CountSafe(IEnumerable<List<int>> input) => input.Count(IsSafe);
 
 bool IsSafeWithDampener(List<int> line)
 {
-    for(int i = 1; i < line.Count; i++)
+    for(int i = 0; i < line.Count; i++)
     {
-        if (IsSafe([.. line[0..(i - 1)], .. line[i..]]))
+        List<int> tmp = [.. line[0..i], .. line[(i+1)..]];
+        if (IsSafe(tmp))
             return true;
     }
     return false;
